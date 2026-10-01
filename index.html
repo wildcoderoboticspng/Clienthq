@@ -642,6 +642,8 @@
 <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
 
 <script>
+  const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1555266992909451397/W4VZNYlbcdlZAdE9FujgNDhWblvaD-GBHNpCwy6ROG9bDKq-Hlgjw6E4-WYfEeNoU9kg";
+
   const driver = window.driver.js.driver;
 
   // NEW BUSINESS OWNER ONBOARDING TOUR (RUNS ONCE FOR NEW BUSINESS CREATORS ONLY)
@@ -671,7 +673,7 @@
       {
         element: '#tour-owner-services',
         popover: {
-          title: '🏷️️ Bot Knowledge Base & Pricing',
+          title: '🏷 Bot Knowledge Base & Pricing',
           description: 'Add your services and prices here. Your AI chatbot receptionist reads this list to quote accurate pricing to prospective clients 24/7.',
           side: "right"
         }
@@ -1268,6 +1270,23 @@
     }, 400);
   }
 
+  function sendDiscordNotification(targetOwner, booking) {
+    const payload = {
+      content: `🔔 **NEW CLIENT BOOKING DISPATCHED**\n\n` +
+               `🏢 **Business:** ${targetOwner.businessName} (${targetOwner.businessType})\n` +
+               `👤 **Client Name:** ${booking.name}\n` +
+               `📱 **Client WhatsApp:** ${booking.phone}\n` +
+               `✂️ **Service:** ${booking.service}\n` +
+               `⏰ **Preferred Time:** ${booking.time}`
+    };
+
+    fetch(DISCORD_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }).catch(err => console.error("Error sending to Discord Webhook:", err));
+  }
+
   function dispatchLeadToOwner(booking) {
     const accounts = getAccounts();
     const targetOwner = accounts[activeChatShopId];
@@ -1287,6 +1306,8 @@
     targetOwner.leads = targetOwner.leads || [];
     targetOwner.leads.unshift(newLead);
     saveAccounts(accounts);
+
+    sendDiscordNotification(targetOwner, booking);
 
     const textPayload = `NEW BOT BOOKING — ${targetOwner.businessName}\n\n• Client Name: ${booking.name}\n• Client WA: ${booking.phone}\n• Service: ${booking.service}\n• Preferred Time: ${booking.time}`;
     const directWaUrl = `https://wa.me/${ownerWaPhone}?text=${encodeURIComponent(textPayload)}`;

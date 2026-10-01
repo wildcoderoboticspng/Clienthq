@@ -80,7 +80,7 @@
     -webkit-backdrop-filter: blur(20px);
     background: rgba(3, 7, 18, 0.85);
     border-bottom: 1px solid var(--border);
-    padding: clamp(12px, 2vw, 18px) 0; 
+    padding: clamp(10px, 2vw, 14px) 0; 
     margin-bottom: clamp(18px, 3vw, 32px);
   }
   .nav-inner { 
@@ -89,16 +89,25 @@
     align-items: center; 
     gap: 12px;
   }
+
+  .brand-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    cursor: pointer;
+  }
+
   .logo { 
     font-family: 'Space Grotesk', sans-serif;
-    font-size: clamp(18px, 4vw, 26px); 
+    font-size: clamp(18px, 4vw, 24px); 
     font-weight: 700; 
     letter-spacing: -0.5px; 
     display: flex; 
     align-items: center; 
-    gap: 8px; 
+    gap: 6px; 
     white-space: nowrap;
-    cursor: pointer;
+    line-height: 1;
   }
   .logo span { 
     background: linear-gradient(135deg, var(--accent-lime), var(--accent-cyan));
@@ -108,8 +117,8 @@
   }
   
   .role-badge {
-    font-size: 10px;
-    padding: 3px 10px;
+    font-size: 9px;
+    padding: 2px 8px;
     border-radius: 99px;
     font-weight: 800;
     text-transform: uppercase;
@@ -362,13 +371,14 @@
 <div class="container">
   <header id="tour-nav">
     <div class="nav-inner">
-      <div class="logo" onclick="switchRole('client')">
-        CLIENT <span>HQ</span>
+      <div class="brand-group" onclick="switchRole('client')">
+        <div class="logo">
+          CLIENT <span>HQ</span>
+        </div>
         <span class="role-badge" id="nav-role-badge">Client Marketplace</span>
       </div>
       <div class="nav-actions">
         <span id="owner-session-text" style="font-size:11px; color:var(--accent-lime); display:none; font-weight:700;">● Owner Active</span>
-        <button class="btn" id="help-btn" onclick="triggerActiveTour()">Take Tour</button>
         <button class="btn" onclick="openRoleModal()">Switch Role</button>
         <button class="btn btn-accent" id="tour-action" onclick="openRoleModal()">Owner Sign In</button>
       </div>
@@ -440,11 +450,11 @@
           <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
             <div style="flex:2; min-width:140px;">
               <label style="font-size:10px; font-weight:800; color:var(--text-muted);">SERVICE NAME</label>
-              <input type="text" id="new-service-name" placeholder="e.g. Skin Fade & Beard Sculpt" style="width:100%; background:var(--bg-input); border:1px solid var(--border); border-radius:12px; padding:10px 14px; color:#fff; outline:none;">
+              <input type="text" id="new-service-name" placeholder="e.g. Skin Fade & Beard Sculpt" onkeypress="if(event.key==='Enter') addOwnerService()" style="width:100%; background:var(--bg-input); border:1px solid var(--border); border-radius:12px; padding:10px 14px; color:#fff; outline:none;">
             </div>
             <div style="flex:1; min-width:90px;">
               <label style="font-size:10px; font-weight:800; color:var(--text-muted);">PRICE</label>
-              <input type="text" id="new-service-price" placeholder="e.g. R200" style="width:100%; background:var(--bg-input); border:1px solid var(--border); border-radius:12px; padding:10px 14px; color:#fff; outline:none;">
+              <input type="text" id="new-service-price" placeholder="e.g. R200" onkeypress="if(event.key==='Enter') addOwnerService()" style="width:100%; background:var(--bg-input); border:1px solid var(--border); border-radius:12px; padding:10px 14px; color:#fff; outline:none;">
             </div>
             <div style="display:flex; align-items:flex-end;">
               <button class="btn btn-accent" onclick="addOwnerService()">Add Service</button>
@@ -534,12 +544,12 @@
     <div style="display:flex; flex-direction:column; gap:12px;">
       <div class="form-group" style="margin-bottom:0;">
         <label class="required">Phone Number or Email (Login ID)</label>
-        <input type="text" id="auth-id" placeholder="e.g. 27612832392 or owner@shop.com">
+        <input type="text" id="auth-id" placeholder="e.g. 27612832392 or owner@shop.com" onkeypress="if(event.key==='Enter') handleOwnerAuth('login')">
       </div>
 
       <div class="form-group" style="margin-bottom:0;">
         <label class="required">Password</label>
-        <input type="password" id="auth-password" placeholder="Enter account password">
+        <input type="password" id="auth-password" placeholder="Enter account password" onkeypress="if(event.key==='Enter') handleOwnerAuth('login')">
       </div>
 
       <div style="display:flex; gap:10px; margin-top:10px;">
@@ -568,12 +578,12 @@
 
       <div class="form-group">
         <label class="required">Business Name</label>
-        <input type="text" id="reg-biz-name" placeholder="e.g. Randburg Auto Detailing">
+        <input type="text" id="reg-biz-name" placeholder="e.g. Randburg Auto Detailing" onkeypress="if(event.key==='Enter') handleOwnerAuth('register')">
       </div>
 
       <div class="form-group">
         <label class="required">OWNER WHATSAPP NUMBER (MANDATORY)</label>
-        <input type="tel" id="reg-biz-phone" placeholder="e.g. 27821234567">
+        <input type="tel" id="reg-biz-phone" placeholder="e.g. 27821234567" onkeypress="if(event.key==='Enter') handleOwnerAuth('register')">
         <small style="font-size:10px; color:var(--text-muted); display:block; margin-top:4px;">Bot client alerts will dispatch straight to this WhatsApp number.</small>
       </div>
 
@@ -634,51 +644,7 @@
 <script>
   const driver = window.driver.js.driver;
 
-  // TOUR 1: CLIENT MARKETPLACE TOUR
-  const clientDriverObj = driver({
-    showProgress: true,
-    animate: true,
-    onDestroyed: () => {
-      localStorage.setItem('hasCompletedClientTour', 'true');
-    },
-    steps: [
-      { 
-        element: '#tour-nav', 
-        popover: { 
-          title: 'Welcome to CLIENT HQ', 
-          description: 'This navigation bar allows you to switch between the Client Directory and Business Operations, or trigger guided tours anytime.',
-          side: "bottom", 
-          align: 'start' 
-        } 
-      },
-      { 
-        element: '#tour-hero', 
-        popover: { 
-          title: '24/7 Digital Receptionist Platform', 
-          description: 'Search for local service providers. Every business features a 24/7 automated receptionist bot that books appointments on auto-pilot.',
-          side: "bottom" 
-        } 
-      },
-      { 
-        element: '#tour-dashboard', 
-        popover: { 
-          title: 'Business Directory', 
-          description: 'Click "Chat & Book 24/7" on any business card to talk directly with their front desk bot, or click "Direct WhatsApp" to reach the owner.',
-          side: "top" 
-        } 
-      },
-      { 
-        element: '#tour-action', 
-        popover: { 
-          title: 'Business Owner Access', 
-          description: 'Are you a service provider? Click here to sign in or register a new account to launch your own automated front desk.',
-          side: "left" 
-        } 
-      }
-    ]
-  });
-
-  // TOUR 2: NEW BUSINESS OWNER ONBOARDING TOUR
+  // NEW BUSINESS OWNER ONBOARDING TOUR (RUNS ONCE FOR NEW BUSINESS CREATORS ONLY)
   const ownerDriverObj = driver({
     showProgress: true,
     animate: true,
@@ -690,7 +656,7 @@
         element: '#dash-shop-title',
         popover: {
           title: '🎉 Welcome to Your Operations HQ!',
-          description: 'Your business account is now live! Let us show you how logging in and managing your automated front desk works.',
+          description: 'Your business account is now live! Let us show you how managing your automated front desk works.',
           side: "bottom"
         }
       },
@@ -705,7 +671,7 @@
       {
         element: '#tour-owner-services',
         popover: {
-          title: '🏷️ Bot Knowledge Base & Pricing',
+          title: '🏷️️ Bot Knowledge Base & Pricing',
           description: 'Add your services and prices here. Your AI chatbot receptionist reads this list to quote accurate pricing to prospective clients 24/7.',
           side: "right"
         }
@@ -736,50 +702,6 @@
       }
     ]
   });
-
-  // Auto-run Client Tour for first-time visitors
-  window.addEventListener('DOMContentLoaded', () => {
-    const session = localStorage.getItem('hq_active_session');
-    const accounts = getAccounts();
-
-    if(session && accounts[session]) {
-      activeOwnerId = session;
-    }
-
-    renderDirectory(accounts);
-
-    // Trigger marketplace tour automatically if not completed
-    if (!localStorage.getItem('hasCompletedClientTour') && !activeOwnerId) {
-      setTimeout(() => {
-        clientDriverObj.drive();
-      }, 500);
-    }
-
-    window.addEventListener('keydown', (e) => {
-      if(e.key === 'Escape') {
-        closeRoleModal();
-        closeChatModal();
-      }
-    });
-
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-      overlay.addEventListener('click', (e) => {
-        if(e.target === overlay) {
-          overlay.classList.remove('active');
-        }
-      });
-    });
-  });
-
-  // Trigger tour manually via button depending on current view
-  function triggerActiveTour() {
-    const isOwnerActive = document.getElementById('view-owner').classList.contains('active');
-    if(isOwnerActive) {
-      ownerDriverObj.drive();
-    } else {
-      clientDriverObj.drive();
-    }
-  }
 
   // Default Business Accounts DB
   const defaultAccounts = {
@@ -824,6 +746,32 @@
   let bookingStep = 0;
   let activeBooking = {};
 
+  window.addEventListener('DOMContentLoaded', () => {
+    const session = localStorage.getItem('hq_active_session');
+    const accounts = getAccounts();
+
+    if(session && accounts[session]) {
+      activeOwnerId = session;
+    }
+
+    renderDirectory(accounts);
+
+    window.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape') {
+        closeRoleModal();
+        closeChatModal();
+      }
+    });
+
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if(e.target === overlay) {
+          overlay.classList.remove('active');
+        }
+      });
+    });
+  });
+
   function handlePicUpload(input, previewId, targetHiddenId) {
     const file = input.files[0];
     if (file) {
@@ -845,12 +793,16 @@
   }
 
   function getAccounts() {
-    const data = localStorage.getItem('hq_accounts_db');
-    if(!data) {
-      localStorage.setItem('hq_accounts_db', JSON.stringify(defaultAccounts));
+    try {
+      const data = localStorage.getItem('hq_accounts_db');
+      if(!data) {
+        localStorage.setItem('hq_accounts_db', JSON.stringify(defaultAccounts));
+        return defaultAccounts;
+      }
+      return JSON.parse(data);
+    } catch(e) {
       return defaultAccounts;
     }
-    return JSON.parse(data);
   }
 
   function saveAccounts(accounts) {
@@ -880,7 +832,7 @@
                 <img src="${picUrl}" class="owner-avatar" alt="${acc.businessName}">
                 <div class="biz-card-title">
                   <b>${acc.businessName}</b>
-                  <small>${acc.businessType.toUpperCase()} • 24/7 BOT READY</small>
+                  <small>${(acc.businessType || 'BUSINESS').toUpperCase()} • 24/7 BOT READY</small>
                 </div>
               </div>
               <span class="status-tag">Online</span>
@@ -991,10 +943,12 @@
       renderDirectory(accounts);
       switchRole('owner');
 
-      // AUTOMATICALLY LAUNCH OWNER ONBOARDING TOUR FOR NEW REGISTRATION
-      setTimeout(() => {
-        ownerDriverObj.drive();
-      }, 400);
+      // ONE-TIME ONBOARDING TOUR TRIGGER FOR NEW BUSINESS CREATORS
+      if (!localStorage.getItem('hasCompletedOwnerTour')) {
+        setTimeout(() => {
+          ownerDriverObj.drive();
+        }, 500);
+      }
     }
   }
 

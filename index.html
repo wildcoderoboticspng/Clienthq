@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CLIENT HQ — 24/7 Digital Receptionist Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-main: #030712;
+    --bg-card: #0b0f19;
+    --bg-card-hover: #111827;
+    --bg-input: #060a12;
+    --accent-cyan: #06b6d4;
+    --accent-emerald: #10b981;
+    --accent-indigo: #6366f1;
+    --accent-glow: rgba(6, 182, 212, 0.18);
+    --text-main: #f9fafb;
+    --text-muted: #9ca3af;
+    --border: #1f2937;
+    --border-bright: #374151;
+    --chat-bot: #111827;
+    --chat-user: #06b6d4;
+    --shadow-glow: 0 0 35px -5px rgba(6, 182, 212, 0.25);
+    --danger: #f43f5e;
+  }
+
+  * { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; 
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    line-height: 1.5;
+    padding-bottom: 50px;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    width: 100vw;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-main); }
+  ::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
+
+  .container { 
+    width: min(100%, 1240px); 
+    margin: 0 auto; 
+    padding: 0 clamp(14px, 3vw, 28px); 
+  }
+
+  /* Glass Header */
+  header {
+    position: sticky; 
+    top: 0; 
+    z-index: 100;
+    backdrop-filter: blur(20px); 
+    -webkit-backdrop-filter: blur(20px);
+    background: rgba(3, 7, 18, 0.82);
+    border-bottom: 1px solid var(--border);
+    padding: clamp(14px, 2vw, 20px) 0; 
+    margin-bottom: clamp(20px, 3vw, 36px);
+  }
+  .nav-inner { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    gap: 12px;
+  }
+  .logo { 
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(20px, 4vw, 26px); 
+    font-weight: 700; 
+    letter-spacing: -0.5px; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .logo span { 
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-indigo));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .role-badge {
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-bright);
+    color: var(--text-muted);
+  }
+  .role-badge.owner { 
+    background: rgba(6, 182, 212, 0.12); 
+    color: var(--accent-cyan); 
+    border-color: rgba(6, 182, 212, 0.4); 
+  }
+
+  .nav-actions { display: flex; gap: 10px; align-items: center; }
+  .btn {
+    background: var(--bg-card); 
+    color: var(--text-main); 
+    border: 1px solid var(--border-bright);
+    padding: clamp(8px, 1.5vw, 10px) clamp(14px, 2vw, 20px); 
+    border-radius: 12px; 
+    font-size: clamp(11px, 2vw, 13px); 
+    font-weight: 600;
+    cursor: pointer; 
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 8px;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .btn:hover { border-color: var(--text-muted); background: var(--bg-card-hover); transform: translateY(-1px); }
+  .btn-accent { 
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-indigo)); 
+    color: #ffffff; 
+    border: none; 
+    font-weight: 700; 
+    box-shadow: var(--shadow-glow); 
+  }
+  .btn-accent:hover { opacity: 0.92; transform: translateY(-2px); }
+  .btn-danger { background: rgba(244, 63, 94, 0.12); color: var(--danger); border: 1px solid rgba(244, 63, 94, 0.3); }
+  .btn-danger:hover { background: rgba(244, 63, 94, 0.25); }
+
+  .view-panel { display: none; }
+  .view-panel.active { display: block; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Hero Banner Visual Styling */
+  .hero-card {
+    background: linear-gradient(135deg, rgba(11, 15, 25, 0.9) 0%, rgba(6, 10, 18, 0.95) 100%),
+                radial-gradient(circle at top right, rgba(6, 182, 212, 0.15), transparent 50%);
+    border: 1px solid var(--border-bright); 
+    border-radius: clamp(20px, 3vw, 28px);
+    padding: clamp(24px, 4vw, 44px) clamp(20px, 3vw, 36px); 
+    margin-bottom: clamp(24px, 3vw, 36px); 
+    position: relative; 
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  }
+  .hero-card::before {
+    content: "";
+    position: absolute;
+    top: 0; right: 0; width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-subtitle {
+    color: var(--accent-cyan); 
+    font-size: clamp(10px, 2vw, 12px); 
+    font-weight: 800; 
+    letter-spacing: 2px;
+    text-transform: uppercase; 
+    margin-bottom: 12px; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px;
+  }
+  .hero-subtitle::before { content: ""; display: inline-block; width: 8px; height: 8px; background: var(--accent-cyan); border-radius: 50%; box-shadow: 0 0 10px var(--accent-cyan); }
+  .hero-card h1 { 
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(26px, 4vw, 42px); 
+    font-weight: 700; 
+    line-height: 1.15; 
+    letter-spacing: -1px; 
+    margin-bottom: 14px; 
+  }
+  .hero-card p { color: var(--text-muted); max-width: 640px; font-size: clamp(13px, 2vw, 15px); margin-bottom: 24px; }
+
+  .search-box {
+    display: flex; gap: 10px; max-width: 620px;
+    background: var(--bg-input); border: 1px solid var(--border-bright);
+    padding: 8px 8px 8px 18px; border-radius: 16px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+    transition: border-color 0.2s ease;
+  }
+  .search-box:focus-within { border-color: var(--accent-cyan); }
+  .search-box input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: #fff; font-size: 14px;
+  }
+
+  /* Marketplace Cards */
+  .directory-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; margin-bottom: 36px;
+  }
+  .biz-card {
+    background: linear-gradient(180deg, rgba(17, 24, 39, 0.6) 0%, rgba(11, 15, 25, 0.9) 100%);
+    border: 1px solid var(--border); border-radius: 22px;
+    padding: 22px; transition: all 0.3s ease; display: flex; flex-direction: column; justify-content: space-between;
+    backdrop-filter: blur(10px);
+  }
+  .biz-card:hover { border-color: var(--accent-cyan); transform: translateY(-4px); box-shadow: var(--shadow-glow); }
+  .biz-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 12px; }
+  
+  .owner-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    object-fit: cover;
+    border: 2px solid var(--accent-cyan);
+    box-shadow: 0 0 12px rgba(6, 182, 212, 0.3);
+    flex-shrink: 0;
+  }
+  .owner-avatar-lg {
+    width: 84px;
+    height: 84px;
+    border-radius: 20px;
+    object-fit: cover;
+    border: 2px solid var(--accent-cyan);
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+    margin-bottom: 12px;
+  }
+
+  .biz-card-title b { font-family: 'Space Grotesk', sans-serif; font-size: 19px; display: block; color: var(--text-main); }
+  .biz-card-title small { color: var(--text-muted); font-size: 12px; letter-spacing: 0.5px; }
+  .status-tag { font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 99px; background: rgba(16, 185, 129, 0.12); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3); white-space: nowrap; }
+  .biz-services { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
+
+  /* Dashboard Layout */
+  .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 14px; }
+  .dash-title h2 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(22px, 3vw, 30px); font-weight: 700; }
+  .dash-title p { color: var(--text-muted); font-size: 13px; }
+
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 18px; margin-bottom: 32px; }
+  .metric-card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 22px;
+    position: relative; overflow: hidden;
+  }
+  .metric-card::after {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--accent-cyan), var(--accent-indigo));
+  }
+  .metric-card small { color: var(--text-muted); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+  .metric-card .val { font-family: 'Space Grotesk', sans-serif; font-size: 34px; font-weight: 700; margin: 8px 0; color: var(--text-main); }
+  .metric-card .change { font-size: 12px; font-weight: 700; color: var(--accent-emerald); }
+
+  .dashboard-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 28px; }
+  .table-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 22px; padding: 24px; overflow-x: auto; margin-bottom: 28px; }
+  .table-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .table-card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 700; }
+
+  table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; min-width: 520px; }
+  th { color: var(--text-muted); font-weight: 700; padding-bottom: 14px; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 14px 0; border-bottom: 1px dashed var(--border); }
+  .badge-delivered { background: rgba(6, 182, 212, 0.12); color: var(--accent-cyan); padding: 3px 10px; border-radius: 8px; font-weight: 700; font-size: 11px; border: 1px solid rgba(6, 182, 212, 0.25); }
+
+  .settings-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 22px; padding: 24px; margin-bottom: 28px; }
+  .settings-card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 10px; font-weight: 800; color: var(--text-muted); letter-spacing: 0.8px; margin-bottom: 8px; text-transform: uppercase; }
+  .form-group label.required::after { content: " *"; color: var(--danger); }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; background: var(--bg-input); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 14px; color: #fff; font-size: 13px; outline: none; transition: border-color 0.2s ease;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent-cyan); }
+
+  .service-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+
+  /* Phone Mockup Frame */
+  .phone-frame {
+    background: #020408; border: 2px solid var(--border-bright); border-radius: 32px;
+    overflow: hidden; display: flex; flex-direction: column; height: 640px; width: 100%; max-width: 420px; margin: 0 auto;
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.9), 0 0 30px rgba(6, 182, 212, 0.15);
+  }
+  .phone-header {
+    background: #0a0f1d; padding: 16px 18px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .phone-header-info { display: flex; align-items: center; gap: 12px; }
+  .phone-header b { font-size: 14px; display: block; }
+  .phone-header small { color: var(--accent-cyan); font-size: 11px; font-weight: 600; }
+
+  .chat-area {
+    flex: 1; padding: 16px; overflow-y: auto; display: flex;
+    flex-direction: column; gap: 12px; background: radial-gradient(circle at center, #070b14 0%, #03060d 100%);
+  }
+  .msg { max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 13px; line-height: 1.45; word-wrap: break-word; }
+  .msg.bot { background: var(--chat-bot); color: var(--text-main); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--border); }
+  .msg.user { background: linear-gradient(135deg, var(--accent-cyan), var(--accent-indigo)); color: #ffffff; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 600; }
+
+  .quick-chips { display: flex; gap: 8px; overflow-x: auto; padding: 10px 12px; background: #060a12; border-top: 1px solid var(--border); }
+  .chip { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-bright); border-radius: 99px; padding: 6px 12px; font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; text-decoration: none; transition: all 0.2s; }
+  .chip:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+
+  .input-bar { display: flex; gap: 8px; padding: 12px; background: #0a0f1d; border-top: 1px solid var(--border); }
+  .input-bar input { flex: 1; background: var(--bg-input); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; color: #fff; font-size: 13px; outline: none; }
+  .input-bar button { background: linear-gradient(135deg, var(--accent-cyan), var(--accent-indigo)); color: #fff; border: none; border-radius: 12px; padding: 0 16px; font-weight: 700; cursor: pointer; }
+
+  /* Modal Windows */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(2, 4, 8, 0.88); display: none; place-items: center; z-index: 1000; padding: 20px; backdrop-filter: blur(12px); }
+  .modal-overlay.active { display: grid; animation: fadeIn 0.2s ease-out; }
+  .modal-box { background: #0b0f19; border: 1px solid var(--border-bright); border-radius: 28px; padding: 32px; max-width: 460px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); }
+
+  @media (max-width: 768px) {
+    .dashboard-layout { grid-template-columns: 1fr; }
+    .nav-actions { gap: 6px; }
+    .btn { padding: 8px 12px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="nav-inner">
+      <div class="logo" onclick="switchRole('client')">
+        CLIENT <span>HQ</span>
+        <span class="role-badge" id="nav-role-badge">Client Marketplace</span>
+      </div>
+      <div class="nav-actions">
+        <span id="owner-session-text" style="font-size:11px; color:var(--accent-cyan); display:none; font-weight:700;">● Owner Signed In</span>
+        <button class="btn" onclick="openRoleModal()">Switch Role</button>
+        <button class="btn btn-accent" id="nav-action-btn" onclick="openRoleModal()">Owner Sign In</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- VIEW 1: CLIENT MARKETPLACE -->
+  <main id="view-client" class="view-panel active">
+    <section class="hero-card">
+      <div class="hero-subtitle">Verified Local Business Directory</div>
+      <h1>Book instant services 24/7 with automated receptionist bots</h1>
+      <p>Connect directly with top barbershops, beauty salons, detailers, and local specialists. Automated receptionists process bookings and alert business owners via WhatsApp instantly.</p>
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Search by service or business name..." oninput="filterBusinesses()">
+        <button class="btn btn-accent">Search</button>
+      </div>
+    </section>
+
+    <div style="font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:18px;">
+      Featured Service Providers
+    </div>
+    
+    <div class="directory-grid" id="directory-container"></div>
+  </main>
+
+  <!-- VIEW 2: ISOLATED BUSINESS OWNER DASHBOARD -->
+  <main id="view-owner" class="view-panel">
+    <div class="dash-header">
+      <div class="dash-title">
+        <h2 id="dash-shop-title">Business Operations HQ</h2>
+        <p>Private portal to manage chatbot services, pricing, profile settings, and WhatsApp lead alerts</p>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-accent" onclick="openActiveOwnerChat()">Test Front Desk Bot</button>
+        <button class="btn btn-danger" onclick="logoutOwner()">Log Out</button>
+      </div>
+    </div>
+
+    <section class="metrics-grid">
+      <div class="metric-card">
+        <small>Total Clients Contacted</small>
+        <div class="val" id="m-accessed">0</div>
+        <div class="change">Private Account Records</div>
+      </div>
+      <div class="metric-card">
+        <small>Auto-Responded</small>
+        <div class="val" id="m-responded">0</div>
+        <div class="change">100% Bot Efficiency</div>
+      </div>
+      <div class="metric-card">
+        <small>Bookings Captured</small>
+        <div class="val" id="m-booked">0</div>
+        <div class="change">Isolated in account</div>
+      </div>
+      <div class="metric-card">
+        <small>WhatsApp Alert Status</small>
+        <div class="val" id="m-alerts">0</div>
+        <div class="change">Live Direct Route</div>
+      </div>
+    </section>
+
+    <div class="dashboard-layout">
+      <!-- Left Column: Services & Leads -->
+      <div>
+        <!-- Services & Prices for Bot Knowledge Base -->
+        <div class="settings-card">
+          <h3>Services & Pricing List (Bot Knowledge Base)</h3>
+          <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">Configure your service offerings. Your digital receptionist automatically quotes these prices to potential clients during chatbot interactions.</p>
+          
+          <div style="display:flex; gap:10px; margin-bottom:16px;">
+            <div style="flex:2;">
+              <label style="font-size:10px; font-weight:800; color:var(--text-muted);">SERVICE NAME</label>
+              <input type="text" id="new-service-name" placeholder="e.g. Skin Fade & Beard Sculpt" style="width:100%; background:var(--bg-input); border:1px solid var(--border); border-radius:12px; padding:10px 14px; color:#fff; outline:none;">
+            </div>
+            <div style="flex:1;">
+              <label style="font-size:10px; font-weight:800; color:var(--text-muted);">PRICE</label>
+              <input type="text" id="new-service-price" placeholder="e.g. R200" style="width:100%; background:var(--bg-input); border:1px solid var(--border); border-radius:12px; padding:10px 14px; color:#fff; outline:none;">
+            </div>
+            <div style="display:flex; align-items:flex-end;">
+              <button class="btn btn-accent" onclick="addOwnerService()">Add Service</button>
+            </div>
+          </div>
+
+          <div id="services-list-container">
+            <!-- Services rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Leads Table -->
+        <div class="table-card">
+          <div class="table-card-header">
+            <h3>Private Client Bookings & Inquiries</h3>
+            <button class="btn" style="padding:4px 10px; font-size:11px;" onclick="clearOwnerLogs()">Clear Activity Log</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Client Name</th>
+                <th>Client WhatsApp</th>
+                <th>Requested Service</th>
+                <th>Preferred Time</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="leads-table-body">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Right Column: Settings & Profile Picture -->
+      <div>
+        <div class="settings-card">
+          <h3>Business & Account Settings</h3>
+          
+          <div style="text-align:center; margin-bottom:20px;">
+            <img id="owner-pic-preview-dash" class="owner-avatar-lg" src="" alt="Owner Profile Avatar">
+          </div>
+
+          <div class="form-group">
+            <label class="required">UPDATE OWNER PROFILE PICTURE</label>
+            <input type="file" id="owner-pic-file-dash" accept="image/*" onchange="handlePicUpload(this, 'owner-pic-preview-dash', 'owner-pic-base64-dash')">
+            <input type="hidden" id="owner-pic-base64-dash">
+            <small style="font-size:10px; color:var(--text-muted); display:block; margin-top:4px;">Upload a high-resolution photo representing your business profile.</small>
+          </div>
+
+          <div class="form-group">
+            <label>ACCOUNT IDENTITY (LOGIN ID)</label>
+            <input type="text" id="owner-identity-display" readonly style="opacity:0.65; cursor:not-allowed;">
+          </div>
+          <div class="form-group">
+            <label>BUSINESS NAME</label>
+            <input type="text" id="owner-name-input" onchange="saveOwnerSettings()">
+          </div>
+          <div class="form-group">
+            <label>CATEGORY</label>
+            <select id="owner-type-select" onchange="saveOwnerSettings()">
+              <option value="Barbershop">Barbershop</option>
+              <option value="Hair Salon">Hair Salon</option>
+              <option value="Nail Studio">Nail Studio</option>
+              <option value="Auto Detailing / Wash">Auto Detailing / Wash</option>
+              <option value="Personal Coaching / Fitness">Personal Coaching / Fitness</option>
+              <option value="General Service Business">General Service Business</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="required">MANDATORY WHATSAPP DISPATCH NUMBER</label>
+            <input type="text" id="owner-phone-input" placeholder="e.g. 27821234567" onchange="saveOwnerSettings()">
+            <small style="font-size:10px; color:var(--text-muted); display:block; margin-top:4px;">Include country code without '+' (e.g. 27 for South Africa).</small>
+          </div>
+          <div class="form-group">
+            <label>ACCOUNT PASSWORD</label>
+            <input type="password" id="owner-pass-input" placeholder="Leave blank to keep unchanged" onchange="saveOwnerSettings()">
+          </div>
+          <button class="btn btn-accent" style="width:100%; justify-content:center; margin-top:10px;" onclick="saveOwnerSettings()">Save Profile Changes</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL 1: OWNER AUTHENTICATION & MANDATORY PHOTO REGISTRATION -->
+<div class="modal-overlay" id="modal-role">
+  <div class="modal-box">
+    <h2 style="font-family:'Space Grotesk', sans-serif; font-size:22px; font-weight:700; margin-bottom:6px;">Business Access Portal</h2>
+    <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Sign in to manage your digital front desk, or set up a new business account.</p>
+
+    <!-- Sign In Form -->
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label>Phone Number or Email (Login ID)</label>
+        <input type="text" id="auth-id" placeholder="e.g. 27612832392 or owner@shop.com">
+      </div>
+
+      <div class="form-group" style="margin-bottom:0;">
+        <label>Password</label>
+        <input type="password" id="auth-password" placeholder="Enter account password">
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button class="btn btn-accent" style="flex:1; justify-content:center;" onclick="handleOwnerAuth('login')">
+          Sign In →
+        </button>
+        <button class="btn" style="flex:1; justify-content:center;" onclick="showRegistrationFields()">
+          New Account
+        </button>
+      </div>
+    </div>
+
+    <!-- NEW OWNER REGISTRATION BLOCK -->
+    <div id="registration-block" style="display:none; margin-top:20px; padding-top:20px; border-top:1px dashed var(--border-bright);">
+      <h3 style="font-family:'Space Grotesk', sans-serif; font-size:16px; font-weight:700; color:var(--accent-cyan); margin-bottom:14px;">Register Business Profile</h3>
+      
+      <div class="form-group">
+        <label class="required">OWNER PROFILE PICTURE (MANDATORY)</label>
+        <input type="file" id="reg-biz-pic-file" accept="image/*" onchange="handlePicUpload(this, 'reg-pic-preview', 'reg-biz-pic-base64')">
+        <input type="hidden" id="reg-biz-pic-base64">
+        <div style="margin-top:10px; text-align:center;">
+          <img id="reg-pic-preview" class="owner-avatar-lg" style="display:none; margin:0 auto;" alt="Profile Preview">
+        </div>
+        <small style="font-size:10px; color:var(--text-muted); display:block; margin-top:4px;">Business owners MUST upload a profile picture before launching an account.</small>
+      </div>
+
+      <div class="form-group">
+        <label>Business Name</label>
+        <input type="text" id="reg-biz-name" placeholder="e.g. Randburg Auto Detailing">
+      </div>
+
+      <div class="form-group">
+        <label class="required">OWNER WHATSAPP NUMBER (MANDATORY)</label>
+        <input type="tel" id="reg-biz-phone" placeholder="e.g. 27821234567">
+        <small style="font-size:10px; color:var(--text-muted); display:block; margin-top:4px;">Bot client alerts will dispatch straight to this WhatsApp number.</small>
+      </div>
+
+      <div class="form-group">
+        <label>Business Type</label>
+        <select id="reg-biz-type">
+          <option value="Barbershop">Barbershop</option>
+          <option value="Hair Salon">Hair Salon</option>
+          <option value="Nail Studio">Nail Studio</option>
+          <option value="Auto Detailing / Wash">Auto Detailing / Wash</option>
+          <option value="Personal Coaching / Fitness">Personal Coaching / Fitness</option>
+          <option value="General Service Business">General Service Business</option>
+        </select>
+      </div>
+
+      <button class="btn btn-accent" style="width:100%; justify-content:center;" onclick="handleOwnerAuth('register')">
+        Create Account & Launch →
+      </button>
+    </div>
+
+    <button class="btn" style="width:100%; justify-content:center; margin-top:16px;" onclick="closeRoleModal()">Return to Marketplace</button>
+  </div>
+</div>
+
+<!-- MODAL 2: CLIENT CHATBOT INTERFACE -->
+<div class="modal-overlay" id="modal-chat">
+  <div class="modal-box" style="padding:0; background:transparent; border:none; max-width:420px;">
+    <div class="phone-frame">
+      <div class="phone-header">
+        <div class="phone-header-info">
+          <img id="chat-header-avatar" class="owner-avatar" style="width:40px; height:40px; border-radius:12px;" src="" alt="Owner">
+          <div>
+            <b id="chat-title-name">Digital Assistant</b>
+            <small>● 24/7 Automated Receptionist</small>
+          </div>
+        </div>
+        <button class="btn" style="padding:4px 10px; font-size:11px;" onclick="closeChatModal()">Close</button>
+      </div>
+
+      <!-- Live Chat Feed -->
+      <div class="chat-area" id="active-chat-box"></div>
+
+      <div class="quick-chips">
+        <button class="chip" onclick="handleQuickAction('Prices')">💰 Pricing Menu</button>
+        <button class="chip" onclick="handleQuickAction('Book')">📅 Book Service</button>
+        <button class="chip" onclick="handleQuickAction('Hours')">🕐 Operating Hours</button>
+      </div>
+      <div class="input-bar">
+        <input type="text" id="chat-input" placeholder="Type a message or click 'Book'..." onkeypress="if(event.key==='Enter') sendChatMessage()">
+        <button onclick="sendChatMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Initial default accounts with default avatars
+  const defaultAccounts = {
+    "27612832392": {
+      id: "27612832392",
+      password: "123",
+      businessName: "FreshFade Barbers",
+      businessType: "Barbershop",
+      phone: "27612832392",
+      profilePic: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+      hours: "Mon–Sat: 08:00–18:00",
+      menu: [
+        { name: "Skin Fade Haircut", price: "R180" },
+        { name: "Fade + Beard Trim", price: "R240" },
+        { name: "Full Beard Sculpt", price: "R130" }
+      ],
+      leads: [
+        { name: "Thabo M.", phone: "27821112233", service: "Fade + Beard Trim", time: "Today @ 15:00", status: "Delivered" },
+        { name: "Sizwe K.", phone: "27839994455", service: "Skin Fade Haircut", time: "Tomorrow @ 10:00", status: "Delivered" }
+      ]
+    },
+    "owner@manetheory.com": {
+      id: "owner@manetheory.com",
+      password: "123",
+      businessName: "Mane Theory Studio",
+      businessType: "Hair Salon",
+      phone: "27830001122",
+      profilePic: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=300&q=80",
+      hours: "Tue–Sat: 09:00–18:00",
+      menu: [
+        { name: "Wash, Cut & Blowdry", price: "R420" },
+        { name: "Full Hair Coloring", price: "R750" }
+      ],
+      leads: [
+        { name: "Sarah L.", phone: "27710009988", service: "Wash, Cut & Blowdry", time: "Friday @ 11:00", status: "Delivered" }
+      ]
+    }
+  };
+
+  let activeOwnerId = null;
+  let activeChatShopId = null;
+  let bookingStep = 0;
+  let activeBooking = {};
+
+  // Image Upload Handler -> Base64
+  function handlePicUpload(input, previewId, targetHiddenId) {
+    const file = input.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64Img = e.target.result;
+        document.getElementById(targetHiddenId).value = base64Img;
+        const imgPreview = document.getElementById(previewId);
+        imgPreview.src = base64Img;
+        imgPreview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  // Clean WhatsApp phone number format
+  function cleanPhoneNumber(num) {
+    if(!num) return "";
+    return num.replace(/[^0-9]/g, '');
+  }
+
+  // Local Storage Database helpers
+  function getAccounts() {
+    const data = localStorage.getItem('hq_accounts_db');
+    if(!data) {
+      localStorage.setItem('hq_accounts_db', JSON.stringify(defaultAccounts));
+      return defaultAccounts;
+    }
+    return JSON.parse(data);
+  }
+
+  function saveAccounts(accounts) {
+    localStorage.setItem('hq_accounts_db', JSON.stringify(accounts));
+  }
+
+  function renderDirectory(accounts) {
+    const container = document.getElementById('directory-container');
+    container.innerHTML = '';
+
+    Object.values(accounts).forEach(acc => {
+      const servicesText = (acc.menu || []).map(m => `${m.name} (${m.price})`).join(' • ') || 'General Services & Bookings';
+      const cleanPhone = cleanPhoneNumber(acc.phone);
+      const waDirectUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent('Hello ' + acc.businessName + ', I would like to inquire about booking.')}`;
+      const picUrl = acc.profilePic || 'https://via.placeholder.com/150';
+
+      container.innerHTML += `
+        <div class="biz-card">
+          <div>
+            <div class="biz-card-header">
+              <div style="display:flex; align-items:center; gap:14px;">
+                <img src="${picUrl}" class="owner-avatar" alt="${acc.businessName}">
+                <div class="biz-card-title">
+                  <b>${acc.businessName}</b>
+                  <small>${acc.businessType.toUpperCase()} • 24/7 BOT READY</small>
+                </div>
+              </div>
+              <span class="status-tag">Online</span>
+            </div>
+            <p class="biz-services">${servicesText}</p>
+          </div>
+          <div style="display:flex; gap:10px; flex-direction:column;">
+            <button class="btn btn-accent" style="width:100%; justify-content:center;" onclick="openChatModal('${acc.id}')">
+              Chat & Book 24/7 →
+            </button>
+            <a href="${waDirectUrl}" target="_blank" class="btn" style="width:100%; justify-content:center; font-size:11px;">
+              💬 Direct WhatsApp (+${cleanPhone})
+            </a>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  function filterBusinesses() {
+    const q = document.getElementById('search-input').value.toLowerCase().trim();
+    const accounts = getAccounts();
+    if(!q) { renderDirectory(accounts); return; }
+
+    const filtered = {};
+    Object.keys(accounts).forEach(key => {
+      const acc = accounts[key];
+      if(acc.businessName.toLowerCase().includes(q) || acc.businessType.toLowerCase().includes(q)) {
+        filtered[key] = acc;
+      }
+    });
+    renderDirectory(filtered);
+  }
+
+  /* AUTHENTICATION & MANDATORY VALIDATION LOGIC */
+  function showRegistrationFields() {
+    document.getElementById('registration-block').style.display = 'block';
+  }
+
+  function handleOwnerAuth(mode) {
+    const id = document.getElementById('auth-id').value.trim();
+    const password = document.getElementById('auth-password').value.trim();
+    const accounts = getAccounts();
+
+    if(!id || !password) {
+      alert("Please enter both your Login ID and Password.");
+      return;
+    }
+
+    if(mode === 'login') {
+      if(accounts[id] && accounts[id].password === password) {
+        activeOwnerId = id;
+        localStorage.setItem('hq_active_session', id);
+        closeRoleModal();
+        switchRole('owner');
+      } else {
+        alert("Invalid credentials. If you are registering a new business, click 'New Account'.");
+      }
+    } else if(mode === 'register') {
+      const bizName = document.getElementById('reg-biz-name').value.trim();
+      const rawPhone = document.getElementById('reg-biz-phone').value.trim();
+      const bizPhone = cleanPhoneNumber(rawPhone);
+      const bizType = document.getElementById('reg-biz-type').value;
+      const profilePic = document.getElementById('reg-biz-pic-base64').value;
+
+      // MANDATORY FIELD VALIDATIONS
+      if(!profilePic) {
+        alert("MANDATORY FIELD REQUIRED:\n\nBusiness owners MUST set a profile picture before creating an account.");
+        return;
+      }
+
+      if(!bizName) {
+        alert("Please enter your Business Name.");
+        return;
+      }
+
+      if(!bizPhone || bizPhone.length < 8) {
+        alert("MANDATORY FIELD REQUIRED:\n\nYou MUST provide a valid WhatsApp Number (e.g. 27821234567) so client bookings reach your phone.");
+        return;
+      }
+
+      if(accounts[id]) {
+        alert("An account with this Login ID already exists. Please sign in.");
+        return;
+      }
+
+      accounts[id] = {
+        id: id,
+        password: password,
+        businessName: bizName,
+        businessType: bizType,
+        phone: bizPhone,
+        profilePic: profilePic,
+        hours: "Mon–Sat: 08:00–18:00",
+        menu: [
+          { name: "Standard Consultation / Service", price: "Inquire" }
+        ],
+        leads: []
+      };
+
+      saveAccounts(accounts);
+      activeOwnerId = id;
+      localStorage.setItem('hq_active_session', id);
+      
+      closeRoleModal();
+      renderDirectory(accounts);
+      switchRole('owner');
+      alert(`Account successfully launched for ${bizName}!\n\nProfile picture saved and WhatsApp dispatch active for: +${bizPhone}`);
+    }
+  }
+
+  function logoutOwner() {
+    activeOwnerId = null;
+    localStorage.removeItem('hq_active_session');
+    switchRole('client');
+    alert("Logged out successfully.");
+  }
+
+  function switchRole(role) {
+    const clientView = document.getElementById('view-client');
+    const ownerView = document.getElementById('view-owner');
+    const roleBadge = document.getElementById('nav-role-badge');
+    const navBtn = document.getElementById('nav-action-btn');
+    const ownerSessionText = document.getElementById('owner-session-text');
+
+    if(role === 'owner') {
+      if(!activeOwnerId) {
+        openRoleModal();
+        return;
+      }
+
+      clientView.classList.remove('active');
+      ownerView.classList.add('active');
+      roleBadge.textContent = 'Owner Operations HQ';
+      roleBadge.classList.add('owner');
+      navBtn.textContent = 'Dashboard Active';
+      ownerSessionText.style.display = 'inline';
+
+      loadOwnerDashboardData();
+    } else {
+      ownerView.classList.remove('active');
+      clientView.classList.add('active');
+      roleBadge.textContent = 'Client Marketplace';
+      roleBadge.classList.remove('owner');
+      navBtn.textContent = activeOwnerId ? 'My Dashboard' : 'Owner Sign In';
+      ownerSessionText.style.display = activeOwnerId ? 'inline' : 'none';
+    }
+  }
+
+  function loadOwnerDashboardData() {
+    const accounts = getAccounts();
+    const owner = accounts[activeOwnerId];
+
+    if(!owner) return;
+
+    document.getElementById('dash-shop-title').textContent = `${owner.businessName} — Operations`;
+    document.getElementById('owner-identity-display').value = owner.id;
+    document.getElementById('owner-name-input').value = owner.businessName;
+    document.getElementById('owner-type-select').value = owner.businessType || 'General Service Business';
+    document.getElementById('owner-phone-input').value = owner.phone;
+    document.getElementById('owner-pass-input').value = '';
+    
+    const previewPic = document.getElementById('owner-pic-preview-dash');
+    previewPic.src = owner.profilePic || 'https://via.placeholder.com/150';
+    document.getElementById('owner-pic-base64-dash').value = owner.profilePic || '';
+
+    renderOwnerServicesList(owner.menu || []);
+
+    const table = document.getElementById('leads-table-body');
+    table.innerHTML = '';
+
+    (owner.leads || []).forEach(lead => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td><b>${lead.name}</b></td>
+        <td><b style="color:var(--accent-cyan);">${lead.phone || 'N/A'}</b></td>
+        <td>${lead.service}</td>
+        <td>${lead.time}</td>
+        <td><span class="badge-delivered">${lead.status || 'Delivered'}</span></td>
+      `;
+      table.appendChild(row);
+    });
+
+    const leadCount = (owner.leads || []).length;
+    document.getElementById('m-accessed').textContent = leadCount;
+    document.getElementById('m-responded').textContent = leadCount;
+    document.getElementById('m-booked').textContent = leadCount;
+    document.getElementById('m-alerts').textContent = leadCount;
+  }
+
+  /* SERVICE & PRICING MANAGEMENT */
+  function renderOwnerServicesList(menu) {
+    const container = document.getElementById('services-list-container');
+    container.innerHTML = '';
+
+    if(menu.length === 0) {
+      container.innerHTML = `<small style="color:var(--text-muted);">No services added yet. Use the fields above to add pricing options.</small>`;
+      return;
+    }
+
+    menu.forEach((item, index) => {
+      const div = document.createElement('div');
+      div.className = 'service-item-row';
+      div.innerHTML = `
+        <div>
+          <b>${item.name}</b>
+          <span style="color:var(--accent-cyan); margin-left:10px; font-weight:700;">${item.price}</span>
+        </div>
+        <button class="btn btn-danger" style="padding:3px 10px; font-size:11px;" onclick="deleteOwnerService(${index})">Remove</button>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function addOwnerService() {
+    if(!activeOwnerId) return;
+    const nameInput = document.getElementById('new-service-name');
+    const priceInput = document.getElementById('new-service-price');
+    
+    const name = nameInput.value.trim();
+    const price = priceInput.value.trim();
+
+    if(!name || !price) {
+      alert("Please enter both a Service Name and Price.");
+      return;
+    }
+
+    const accounts = getAccounts();
+    accounts[activeOwnerId].menu = accounts[activeOwnerId].menu || [];
+    accounts[activeOwnerId].menu.push({ name: name, price: price });
+
+    saveAccounts(accounts);
+    nameInput.value = '';
+    priceInput.value = '';
+
+    renderOwnerServicesList(accounts[activeOwnerId].menu);
+    renderDirectory(accounts);
+  }
+
+  function deleteOwnerService(index) {
+    if(!activeOwnerId) return;
+    const accounts = getAccounts();
+    accounts[activeOwnerId].menu.splice(index, 1);
+    saveAccounts(accounts);
+
+    renderOwnerServicesList(accounts[activeOwnerId].menu);
+    renderDirectory(accounts);
+  }
+
+  function saveOwnerSettings() {
+    if(!activeOwnerId) return;
+    const accounts = getAccounts();
+    const owner = accounts[activeOwnerId];
+
+    const newName = document.getElementById('owner-name-input').value.trim();
+    const newType = document.getElementById('owner-type-select').value;
+    const rawPhone = document.getElementById('owner-phone-input').value.trim();
+    const newPhone = cleanPhoneNumber(rawPhone);
+    const newPass = document.getElementById('owner-pass-input').value.trim();
+    const newPic = document.getElementById('owner-pic-base64-dash').value;
+
+    if(!newPic) {
+      alert("MANDATORY FIELD ERROR:\n\nProfile picture is required and cannot be removed.");
+      return;
+    }
+
+    if(!newPhone || newPhone.length < 8) {
+      alert("MANDATORY FIELD ERROR:\n\nYou MUST keep a valid WhatsApp number for lead alerts.");
+      document.getElementById('owner-phone-input').value = owner.phone;
+      return;
+    }
+
+    if(newName) owner.businessName = newName;
+    if(newType) owner.businessType = newType;
+    owner.phone = newPhone;
+    owner.profilePic = newPic;
+    if(newPass) owner.password = newPass;
+
+    saveAccounts(accounts);
+    renderDirectory(accounts);
+    loadOwnerDashboardData();
+    alert("Profile settings and profile picture updated successfully.");
+  }
+
+  function clearOwnerLogs() {
+    if(!activeOwnerId) return;
+    const accounts = getAccounts();
+    accounts[activeOwnerId].leads = [];
+    saveAccounts(accounts);
+    loadOwnerDashboardData();
+  }
+
+  function openRoleModal() { 
+    document.getElementById('registration-block').style.display = 'none';
+    document.getElementById('modal-role').classList.add('active'); 
+  }
+  function closeRoleModal() { document.getElementById('modal-role').classList.remove('active'); }
+
+  /* CHATBOT INTEGRATION */
+  function openChatModal(shopId) {
+    activeChatShopId = shopId;
+    const accounts = getAccounts();
+    const biz = accounts[shopId];
+
+    document.getElementById('chat-title-name').textContent = biz.businessName;
+    document.getElementById('chat-header-avatar').src = biz.profilePic || 'https://via.placeholder.com/150';
+
+    const box = document.getElementById('active-chat-box');
+    box.innerHTML = `<div class="msg bot">👋🏽 Hello! Welcome to <b>${biz.businessName}</b> (${biz.businessType}). How can I assist you today?</div>`;
+
+    bookingStep = 0;
+    activeBooking = {};
+    document.getElementById('modal-chat').classList.add('active');
+  }
+
+  function openActiveOwnerChat() {
+    if(activeOwnerId) openChatModal(activeOwnerId);
+  }
+
+  function closeChatModal() { document.getElementById('modal-chat').classList.remove('active'); }
+
+  function appendChatMsg(text, sender) {
+    const box = document.getElementById('active-chat-box');
+    const div = document.createElement('div');
+    div.className = `msg ${sender}`;
+    div.innerHTML = text;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function handleQuickAction(action) {
+    const accounts = getAccounts();
+    const biz = accounts[activeChatShopId];
+    appendChatMsg(action, 'user');
+
+    setTimeout(() => {
+      if(action === 'Prices') {
+        const menu = biz.menu || [];
+        if(menu.length === 0) {
+          appendChatMsg(`Please inquire directly for current pricing options.`, 'bot');
+        } else {
+          let list = `Our current service menu and pricing:<br><br>`;
+          menu.forEach(m => { list += `• <b>${m.name}</b> — ${m.price}<br>`; });
+          appendChatMsg(list, 'bot');
+        }
+      } else if(action === 'Hours') {
+        appendChatMsg(`🕒 Operating Hours: <b>${biz.hours || 'Mon–Sat: 08:00–18:00'}</b>.<br>You can submit booking requests 24/7!`, 'bot');
+      } else if(action === 'Book') {
+        startBooking();
+      }
+    }, 300);
+  }
+
+  function startBooking() {
+    const accounts = getAccounts();
+    const biz = accounts[activeChatShopId];
+    const menu = biz.menu || [];
+    bookingStep = 1;
+
+    if(menu.length === 0) {
+      appendChatMsg(`What service would you like to book?`, 'bot');
+      bookingStep = 2;
+      return;
+    }
+
+    let text = `Select a service to book:<br><br>`;
+    menu.forEach(m => {
+      text += `<button class="chip" style="margin-bottom:6px" onclick="selectService('${m.name}')">${m.name} (${m.price})</button><br>`;
+    });
+    appendChatMsg(text, 'bot');
+  }
+
+  function selectService(srv) {
+    activeBooking.service = srv;
+    appendChatMsg(`Service: ${srv}`, 'user');
+    bookingStep = 2;
+    setTimeout(() => {
+      appendChatMsg(`What date and time work best for you?`, 'bot');
+    }, 300);
+  }
+
+  function sendChatMessage() {
+    const input = document.getElementById('chat-input');
+    const val = input.value.trim();
+    if(!val) return;
+
+    appendChatMsg(val, 'user');
+    input.value = '';
+
+    setTimeout(() => {
+      if(bookingStep === 1) {
+        activeBooking.service = val;
+        bookingStep = 2;
+        appendChatMsg(`What date and time work best for you?`, 'bot');
+      } else if(bookingStep === 2) {
+        activeBooking.time = val;
+        bookingStep = 3;
+        appendChatMsg(`Please enter your full name:`, 'bot');
+      } else if(bookingStep === 3) {
+        activeBooking.name = val;
+        bookingStep = 4;
+        appendChatMsg(`Please enter your <b>WhatsApp Phone Number</b>:`, 'bot');
+      } else if(bookingStep === 4) {
+        activeBooking.phone = val;
+        bookingStep = 0;
+        appendChatMsg(`⚡ Dispatching request directly to owner's WhatsApp...`, 'bot');
+        dispatchLeadToOwner(activeBooking);
+      } else {
+        appendChatMsg(`Thanks! Click <b>Book Service</b> to initiate a booking.`, 'bot');
+      }
+    }, 400);
+  }
+
+  function dispatchLeadToOwner(booking) {
+    const accounts = getAccounts();
+    const targetOwner = accounts[activeChatShopId];
+
+    if(!targetOwner) return;
+
+    const ownerWaPhone = cleanPhoneNumber(targetOwner.phone);
+
+    const newLead = {
+      name: booking.name,
+      phone: booking.phone,
+      service: booking.service || "General Booking",
+      time: booking.time || "Immediate",
+      status: "Delivered (WA)"
+    };
+
+    targetOwner.leads = targetOwner.leads || [];
+    targetOwner.leads.unshift(newLead);
+    saveAccounts(accounts);
+
+    const textPayload = `NEW BOT BOOKING — ${targetOwner.businessName}%0A%0A• Client Name: ${booking.name}%0A• Client WA: ${booking.phone}%0A• Service: ${booking.service}%0A• Preferred Time: ${booking.time}`;
+    const directWaUrl = `https://wa.me/${ownerWaPhone}?text=${textPayload}`;
+
+    appendChatMsg(
+      `✅ <b>Booking Dispatched!</b><br><br>` +
+      `Your request has been sent to <b>${targetOwner.businessName}</b>'s WhatsApp (+${ownerWaPhone}).<br><br>` +
+      `<a href="${directWaUrl}" target="_blank" class="btn btn-accent" style="display:inline-block; margin-top:6px; text-decoration:none;">` +
+      `📲 Open WhatsApp Thread →</a>`, 
+      'bot'
+    );
+
+    setTimeout(() => {
+      window.open(directWaUrl, '_blank');
+    }, 800);
+
+    if(activeOwnerId === targetOwner.id) {
+      loadOwnerDashboardData();
+    }
+  }
+
+  // Initialization
+  window.addEventListener('DOMContentLoaded', () => {
+    const session = localStorage.getItem('hq_active_session');
+    const accounts = getAccounts();
+
+    if(session && accounts[session]) {
+      activeOwnerId = session;
+    }
+
+    renderDirectory(accounts);
+  });
+</script>
+</body>
+</html>

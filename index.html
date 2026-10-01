@@ -57,7 +57,7 @@
     padding-bottom: 50px;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
-    width: 100vw;
+    width: 100%;
     touch-action: manipulation;
   }
 
@@ -379,8 +379,8 @@
       </div>
       <div class="nav-actions">
         <span id="owner-session-text" style="font-size:11px; color:var(--accent-lime); display:none; font-weight:700;">● Owner Active</span>
-        <button class="btn" onclick="openRoleModal()">Switch Role</button>
-        <button class="btn btn-accent" id="tour-action" onclick="openRoleModal()">Owner Sign In</button>
+        <button class="btn" onclick="openRoleModal()">Switch Account</button>
+        <button class="btn btn-accent" id="tour-action" onclick="handleNavAction()">Owner Sign In</button>
       </div>
     </div>
   </header>
@@ -781,6 +781,7 @@
     }
 
     renderDirectory(accounts);
+    updateNavButtons();
 
     window.addEventListener('keydown', (e) => {
       if(e.key === 'Escape') {
@@ -798,9 +799,9 @@
     });
   });
 
-  // Client-side image canvas compression to prevent localStorage QuotaExceededError
+  // Client-side image canvas compression
   function handlePicUpload(input, previewId, targetHiddenId) {
-    const file = input.files[0];
+    const file = input.files && input.files[0];
     if (file) {
       const img = new Image();
       const reader = new FileReader();
@@ -830,13 +831,15 @@
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
 
-          // Compress to lightweight JPEG data URL
           const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
 
           document.getElementById(targetHiddenId).value = compressedBase64;
           const imgPreview = document.getElementById(previewId);
           imgPreview.src = compressedBase64;
           imgPreview.style.display = 'block';
+        };
+        img.onerror = function() {
+          alert("Selected file is not a valid image format.");
         };
         img.src = e.target.result;
       };
@@ -886,31 +889,37 @@
       const waDirectUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent('Hello ' + acc.businessName + ', I would like to inquire about booking.')}`;
       const picUrl = acc.profilePic || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80';
 
-      container.innerHTML += `
-        <div class="biz-card">
-          <div>
-            <div class="biz-card-header">
-              <div style="display:flex; align-items:center; gap:12px;">
-                <img src="${picUrl}" class="owner-avatar" alt="${safeBizName}">
-                <div class="biz-card-title">
-                  <b>${safeBizName}</b>
-                  <small>${escapeHTML(acc.businessType || 'BUSINESS').toUpperCase()} • 24/7 BOT READY</small>
-                </div>
+      const card = document.createElement('div');
+      card.className = 'biz-card';
+      card.innerHTML = `
+        <div>
+          <div class="biz-card-header">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <img src="${picUrl}" class="owner-avatar" alt="${safeBizName}">
+              <div class="biz-card-title">
+                <b>${safeBizName}</b>
+                <small>${escapeHTML(acc.businessType || 'BUSINESS').toUpperCase()} • 24/7 BOT READY</small>
               </div>
-              <span class="status-tag">Online</span>
             </div>
-            <p class="biz-services">${servicesText}</p>
+            <span class="status-tag">Online</span>
           </div>
-          <div style="display:flex; gap:10px; flex-direction:column;">
-            <button class="btn btn-accent" style="width:100%; justify-content:center;" onclick="openChatModal('${escapeHTML(acc.id)}')">
-              Chat & Book 24/7 →
-            </button>
-            <a href="${waDirectUrl}" target="_blank" class="btn" style="width:100%; justify-content:center; font-size:11px;">
-              💬 Direct WhatsApp (+${cleanPhone})
-            </a>
-          </div>
+          <p class="biz-services">${servicesText}</p>
+        </div>
+        <div style="display:flex; gap:10px; flex-direction:column;">
+          <button class="btn btn-accent chat-btn" style="width:100%; justify-content:center;" data-id="${escapeHTML(acc.id)}">
+            Chat & Book 24/7 →
+          </button>
+          <a href="${waDirectUrl}" target="_blank" class="btn" style="width:100%; justify-content:center; font-size:11px;">
+            💬 Direct WhatsApp (+${cleanPhone})
+          </a>
         </div>
       `;
+
+      card.querySelector('.chat-btn').addEventListener('click', function() {
+        openChatModal(this.getAttribute('data-id'));
+      });
+
+      container.appendChild(card);
     });
   }
 
@@ -1005,7 +1014,6 @@
       renderDirectory(accounts);
       switchRole('owner');
 
-      // ONE-TIME ONBOARDING TOUR TRIGGER FOR NEW BUSINESS CREATORS
       if (!localStorage.getItem('hasCompletedOwnerTour') && ownerDriverObj) {
         setTimeout(() => {
           ownerDriverObj.drive();
@@ -1018,38 +1026,60 @@
     activeOwnerId = null;
     localStorage.removeItem('hq_active_session');
     switchRole('client');
-    alert("Logged out successfully. You can log back in anytime using the 'Owner Sign In' button.");
+    alert("Logged out successfully.");
+  }
+
+  function handleNavAction() {
+    if (activeOwnerId) {
+      const isOwnerActive = document.getElementById('view-owner').classList.contains('active');
+      switchRole(isOwnerActive ? 'client' : 'owner');
+    } else {
+      openRoleModal();
+    }
+  }
+
+  function updateNavButtons() {
+    const navBtn = document.getElementById('tour-action');
+    const ownerSessionText = document.getElementById('owner-session-text');
+    const roleBadge = document.getElementById('nav-role-badge');
+    const isOwnerActive = document.getElementById('view-owner').classList.contains('active');
+
+    if (activeOwnerId) {
+      ownerSessionText.style.display = 'inline';
+      if (isOwnerActive) {
+        roleBadge.textContent = 'Owner Operations HQ';
+        roleBadge.classList.add('owner');
+        navBtn.textContent = 'Client Marketplace →';
+      } else {
+        roleBadge.textContent = 'Client Marketplace';
+        roleBadge.classList.remove('owner');
+        navBtn.textContent = 'My Dashboard →';
+      }
+    } else {
+      ownerSessionText.style.display = 'none';
+      roleBadge.textContent = 'Client Marketplace';
+      roleBadge.classList.remove('owner');
+      navBtn.textContent = 'Owner Sign In';
+    }
   }
 
   function switchRole(role) {
     const clientView = document.getElementById('view-client');
     const ownerView = document.getElementById('view-owner');
-    const roleBadge = document.getElementById('nav-role-badge');
-    const navBtn = document.getElementById('tour-action');
-    const ownerSessionText = document.getElementById('owner-session-text');
 
     if(role === 'owner') {
       if(!activeOwnerId) {
         openRoleModal();
         return;
       }
-
       clientView.classList.remove('active');
       ownerView.classList.add('active');
-      roleBadge.textContent = 'Owner Operations HQ';
-      roleBadge.classList.add('owner');
-      navBtn.textContent = 'Dashboard Active';
-      ownerSessionText.style.display = 'inline';
-
       loadOwnerDashboardData();
     } else {
       ownerView.classList.remove('active');
       clientView.classList.add('active');
-      roleBadge.textContent = 'Client Marketplace';
-      roleBadge.classList.remove('owner');
-      navBtn.textContent = activeOwnerId ? 'My Dashboard' : 'Owner Sign In';
-      ownerSessionText.style.display = activeOwnerId ? 'inline' : 'none';
     }
+    updateNavButtons();
   }
 
   function loadOwnerDashboardData() {
@@ -1209,6 +1239,8 @@
     const accounts = getAccounts();
     const biz = accounts[shopId];
 
+    if(!biz) return;
+
     document.getElementById('chat-title-name').textContent = biz.businessName;
     document.getElementById('chat-header-avatar').src = biz.profilePic || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80';
 
@@ -1246,6 +1278,7 @@
 
     setTimeout(() => {
       if(action === 'Prices') {
+        bookingStep = 0;
         const menu = biz.menu || [];
         if(menu.length === 0) {
           appendChatMsg(`Please inquire directly for current pricing options.`, 'bot');
@@ -1255,6 +1288,7 @@
           appendChatMsg(list, 'bot', true);
         }
       } else if(action === 'Hours') {
+        bookingStep = 0;
         appendChatMsg(`🕒 Operating Hours: <b>${escapeHTML(biz.hours || 'Mon–Sat: 08:00–18:00')}</b>.<br>You can submit booking requests 24/7!`, 'bot', true);
       } else if(action === 'Book') {
         startBooking();
@@ -1269,23 +1303,29 @@
 
     if(menu.length === 0) {
       appendChatMsg(`What service would you like to book?`, 'bot');
-      bookingStep = 1; // FIX: Prompt user for service input cleanly
+      bookingStep = 1;
       return;
     }
 
     bookingStep = 1;
     let text = `Select a service to book:<br><br>`;
-    menu.forEach(m => {
+    menu.forEach((m, idx) => {
       const safeName = escapeHTML(m.name);
       const safePrice = escapeHTML(m.price);
-      text += `<button class="chip" style="margin-bottom:6px" onclick="selectService('${safeName}')">${safeName} (${safePrice})</button><br>`;
+      text += `<button class="chip" style="margin-bottom:6px" onclick="selectServiceByIndex(${idx})">${safeName} (${safePrice})</button><br>`;
     });
     appendChatMsg(text, 'bot', true);
   }
 
-  function selectService(srv) {
-    activeBooking.service = srv;
-    appendChatMsg(`Service: ${srv}`, 'user');
+  function selectServiceByIndex(index) {
+    const accounts = getAccounts();
+    const biz = accounts[activeChatShopId];
+    const item = (biz && biz.menu) ? biz.menu[index] : null;
+
+    if(!item) return;
+
+    activeBooking.service = item.name;
+    appendChatMsg(`Service: ${item.name}`, 'user');
     bookingStep = 2;
     setTimeout(() => {
       appendChatMsg(`What date and time work best for you?`, 'bot');
